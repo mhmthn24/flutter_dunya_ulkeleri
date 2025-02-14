@@ -25,27 +25,19 @@ class _AnasayfaState extends State<Anasayfa> {
       _getUlkeler();
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: _ulkeler.isNotEmpty ? _buildBody() : Center(child: CircularProgressIndicator()),
+        child: _ulkeler.isNotEmpty
+            ? _buildBody()
+            : Center(child: CircularProgressIndicator()),
     );
   }
 
   Widget _buildBody(){
     return Scaffold(
-      floatingActionButton: Padding(
-        padding: EdgeInsets.all(8),
-        child: FloatingActionButton(
-          backgroundColor: Colors.indigo,
-          splashColor: Colors.blue,
-          onPressed: (){},
-          child: Icon(
-            Icons.favorite,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      floatingActionButton: _buildFloatingButton(),
       body: Column(
         children: [
           Expanded(
@@ -55,6 +47,21 @@ class _AnasayfaState extends State<Anasayfa> {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingButton(){
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: FloatingActionButton(
+        backgroundColor: Colors.indigo,
+        splashColor: Colors.blue,
+        onPressed: (){},
+        child: Icon(
+          Icons.favorite,
+          color: Colors.white,
+        ),
       ),
     );
   }
