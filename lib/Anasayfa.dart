@@ -21,7 +21,7 @@ class _AnasayfaState extends State<Anasayfa> {
 
     ************************************************************************
 
-    Kullanılan para birimi JSON dokumani icin:
+    Kullanılan para birimi JSON dokumani icin: https://exchangeratesapi.io
 
     Siteye uye olduktan sonra API Key alarak calisabilirsiniz.
    */
@@ -71,15 +71,30 @@ class _AnasayfaState extends State<Anasayfa> {
     return Scaffold(
       appBar: _buildAppBar(),
       floatingActionButton: _buildFloatingButton(),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: aramaAktif ? arananUlkeler.length : _ulkeler.length,
-              itemBuilder: _buildListViewBuilder,
+      body: Stack(
+        children:[
+          Opacity(
+            opacity: 0.3,
+            child: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("assets/images/ulkeler_arka_plan.webp"),
+                      fit: BoxFit.cover
+                  )
+              ),
             ),
-          )
-        ],
+          ),
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: aramaAktif ? arananUlkeler.length : _ulkeler.length,
+                  itemBuilder: _buildListViewBuilder,
+                ),
+              )
+            ],
+          ),
+        ]
       ),
     );
   }

@@ -15,9 +15,28 @@ class Ulkedetay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(utf8.decode(ulke.ulke_ad.runes.toList())),
+        title: Text(ulke.ulke_ad),
       ),
-      body: _buildBody(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _haritayiAc,
+        child: Icon(Icons.map_outlined),
+      ),
+      body: Stack(
+          children: [
+            Opacity(
+              opacity: 0.8,
+              child: Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/images/ulkeler_arka_plan.webp"),
+                        fit: BoxFit.cover
+                    )
+                ),
+              ),
+            ),
+            _buildBody(context),
+          ]
+      ),
     );
   }
 
@@ -37,7 +56,6 @@ class Ulkedetay extends StatelessWidget {
             _buildDetayBilgi("Population:", ulke.ulke_nufus.toString()),
             _buildDetayBilgi("Region:", ulke.ulke_bolge),
             _buildDetayKurDegeri(),
-            _buildHaritaButon()
           ],
         ),
       ),
@@ -54,7 +72,7 @@ class Ulkedetay extends StatelessWidget {
   Widget _buildDetayBilgi(String baslik, String detayBilgi){
 
     return Card(
-      color: Colors.blueAccent,
+      color: Colors.blueAccent.withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -94,7 +112,7 @@ class Ulkedetay extends StatelessWidget {
     }
 
     return Card(
-      color: Colors.blueAccent,
+      color: Colors.blueAccent.withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -129,24 +147,27 @@ class Ulkedetay extends StatelessWidget {
                     Text(
                       "${ulke.ulke_para_birim} / USD",
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
                       ),
                     )
                   else
                     Text(
                       ulke.ulke_para_birim,
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
                       ),
                     ),
                   if(ulkeKurDegeri != null)
                     Text(
                       ulkeKurDegeri!.toStringAsFixed(4),
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
                       ),
                     )
                 ],
