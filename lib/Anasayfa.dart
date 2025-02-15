@@ -13,17 +13,34 @@ class Anasayfa extends StatefulWidget {
 
 class _AnasayfaState extends State<Anasayfa> {
   /*
-    Kullanılan JSON dokumani icin: https://restcountries.com
+    Kullanılan Ulke bilgilerinin JSON dokumani icin: https://restcountries.com
 
     Dokuman sayfasinda da belirttigi gibi
     https://restcountries.com/v3.1/all?fields= alanindan sonra dokumanda
     bulunan name, flags, capital gibi istenilen ozelliklere bakabilirsiniz.
+
+    ************************************************************************
+
+    Kullanılan para birimi JSON dokumani icin:
+
+    Siteye uye olduktan sonra API Key alarak calisabilirsiniz.
    */
-  final String _apiURL = "https://restcountries.com/v3.1/all?fields=name,flags,"
+  final String _apiUlkeler = "https://restcountries.com/v3.1/all?fields=name,flags,"
       "cca2,independent,currencies,capital,region,languages,area,"
       "maps,population,continents";
 
+  final String _baseCurrencyUrl = "https://api.exchangeratesapi.io/v1/"
+      "latest?access_key=";
+
+  /*
+                         !!!!!!!!! ONEMLI NOT !!!!!!!!!
+    Bu API anahtari calismadan sonra resetlenecektir. Bundan dolayı kendi API
+    anahtarinizi buraya girmeniz gerekmektedir.
+   */
+  final String _apiKeyCurrency = "6cb7566eabbdd26123176016ab2fbd50";
+
   final List<Ulke> _ulkeler = [];
+  Map<String, double> currencies = {};
   bool aramaAktif = false;
   TextEditingController _controllerArama = TextEditingController();
   FocusNode aramaFocus = FocusNode();
@@ -34,6 +51,7 @@ class _AnasayfaState extends State<Anasayfa> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_){
       _getUlkeler();
+      _getCurrencies();
     });
   }
 
@@ -153,7 +171,7 @@ class _AnasayfaState extends State<Anasayfa> {
         trailing: Icon(Icons.favorite_border, color: Colors.red,),
         onTap: (){
           setState(() {
-            _gitUlkeDetay(gosterilecekUlkeler[index]);
+            _gitUlkeDetay(gosterilecekUlkeler[index], currencies);
           });
         },
       ),
@@ -180,7 +198,7 @@ class _AnasayfaState extends State<Anasayfa> {
     /*
       API kullanarak ulke bilgilerini alalim
      */
-    Uri uri = Uri.parse(_apiURL);
+    Uri uri = Uri.parse(_apiUlkeler);
     Response response = await get(uri);
 
     // Gelen JSON response Liste türünde gelmekte
@@ -197,12 +215,36 @@ class _AnasayfaState extends State<Anasayfa> {
     setState(() {});
   }
 
-  void _gitUlkeDetay(Ulke ulke){
+  void _gitUlkeDetay(Ulke ulke, Map<String, double> kurDegerleri){
     MaterialPageRoute gidilecekSayfa = MaterialPageRoute(builder: (BuildContext context){
-      return Ulkedetay(ulke);
+      return Ulkedetay(ulke, kurDegerleri);
     });
     Navigator.push(context, gidilecekSayfa);
   }
 
+  void _getCurrencies() async {
+    Uri uri = Uri.parse(_baseCurrencyUrl + _apiKeyCurrency);
+    Response response = await get(uri);
+
+    Map<String, dynamic> parsedCurrency = jsonDecode(response.body);
+    Map<String, dynamic> rates = parsedCurrency["rates"];
+
+    /*
+      Burada hangi ulkenin kurunu base almak istersek onun donusumunu
+      yapiyoruz. API dan gelen degerler EURO bazında degerlerdir. Burada da
+      istedigimiz kur bazinda donusum yapiyoruz.
+     */
+    double? baseKur = double.tryParse(rates["USD"].toString());
+    if (baseKur != null){
+      for (String kur_adi in rates.keys){
+        double? ulkeKur = double.tryParse(rates[kur_adi].toString());
+        if(ulkeKur != null){
+          double kurDegeri = baseKur / ulkeKur;
+          currencies[kur_adi] = kurDegeri;
+        }
+      }
+    }
+    setState(() {});
+  }
 }
 
