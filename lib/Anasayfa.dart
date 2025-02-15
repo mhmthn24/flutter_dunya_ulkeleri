@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dunya_ulkeleri/FavorilerListelemeEkrani.dart';
 import 'package:flutter_dunya_ulkeleri/Ulke.dart';
 import 'package:flutter_dunya_ulkeleri/UlkeDetay.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Anasayfa extends StatefulWidget {
   const Anasayfa({super.key});
@@ -41,17 +43,23 @@ class _AnasayfaState extends State<Anasayfa> {
 
   final List<Ulke> _ulkeler = [];
   Map<String, double> currencies = {};
+
   bool aramaAktif = false;
   TextEditingController _controllerArama = TextEditingController();
   FocusNode aramaFocus = FocusNode();
   List<Ulke> arananUlkeler = [];
 
+  List<String> _favoriUlkeler = [];
+  List<Ulke> _favoriUlkelerParam = [];
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_){
-      _getUlkeler();
-      _getCurrencies();
+      _favorileriYukle().then((value){
+        _getUlkeler();
+        _getCurrencies();
+      });
     });
   }
 
@@ -162,7 +170,9 @@ class _AnasayfaState extends State<Anasayfa> {
       child: FloatingActionButton(
         backgroundColor: Colors.indigo,
         splashColor: Colors.blue,
-        onPressed: (){},
+        onPressed: (){
+          _gitFavorilerList(context, _favoriUlkelerParam);
+        },
         child: Icon(
           Icons.favorite,
           color: Colors.white,
@@ -183,7 +193,16 @@ class _AnasayfaState extends State<Anasayfa> {
         title: Text(utf8.decode(gosterilecekUlkeler[index].ulke_ad.runes.toList())),
         subtitle: Text("Capital: ${utf8.decode(gosterilecekUlkeler[index].ulke_baskent.runes.toList())}"),
         leading: CircleAvatar(backgroundImage: NetworkImage(gosterilecekUlkeler[index].ulke_bayrak),),
-        trailing: Icon(Icons.favorite_border, color: Colors.red,),
+        trailing: IconButton(
+          onPressed: (){
+            _favoriButonTiklandi(gosterilecekUlkeler[index]);
+          },
+          icon: Icon(
+            _favoriUlkeler.contains(gosterilecekUlkeler[index].ulke_kod)
+                ? Icons.favorite
+                : Icons.favorite_border
+          ),
+        ),
         onTap: (){
           setState(() {
             _gitUlkeDetay(gosterilecekUlkeler[index], currencies);
@@ -237,6 +256,22 @@ class _AnasayfaState extends State<Anasayfa> {
     Navigator.push(context, gidilecekSayfa);
   }
 
+  void _gitFavorilerList(BuildContext context, List<Ulke> favoriUlkelerParam){
+    favoriUlkelerParam = [];
+    for (Ulke ulke in _ulkeler){
+      if(_favoriUlkeler.contains(ulke.ulke_kod)){
+        if(!favoriUlkelerParam.contains(ulke)){
+          favoriUlkelerParam.add(ulke);
+        }
+      }
+    }
+
+    MaterialPageRoute gidilecekSayfaYolu = MaterialPageRoute(builder: (context){
+      return Favorilerlistelemeekrani(favoriUlkelerParam, currencies);
+    });
+    Navigator.push(context, gidilecekSayfaYolu);
+  }
+
   void _getCurrencies() async {
     Uri uri = Uri.parse(_baseCurrencyUrl + _apiKeyCurrency);
     Response response = await get(uri);
@@ -261,5 +296,32 @@ class _AnasayfaState extends State<Anasayfa> {
     }
     setState(() {});
   }
+
+  void _favoriButonTiklandi(Ulke ulke) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if(_favoriUlkeler.contains(ulke.ulke_kod)){
+      _favoriUlkeler.remove(ulke.ulke_kod);
+    }else{
+      _favoriUlkeler.add(ulke.ulke_kod);
+    }
+
+    await prefs.setStringList("favoriler", _favoriUlkeler);
+
+    setState(() {});
+  }
+
+  Future<void> _favorileriYukle() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List<String>? favoriler = await prefs.getStringList("favoriler");
+
+    if(favoriler != null){
+      for(String ulkeKodu in favoriler){
+        _favoriUlkeler.add(ulkeKodu);
+      }
+    }
+  }
+
 }
 

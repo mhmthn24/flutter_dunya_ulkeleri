@@ -53,9 +53,10 @@ class Ulkedetay extends StatelessWidget {
             _buildDetayBilgi("Local Name:", ulke.ulke_yerel_ad),
             _buildDetayBilgi("Capital:", ulke.ulke_baskent),
             _buildDetayBilgi("Language:", ulke.ulke_dil),
+            _buildDetayKurDegeri(),
             _buildDetayBilgi("Population:", ulke.ulke_nufus.toString()),
             _buildDetayBilgi("Region:", ulke.ulke_bolge),
-            _buildDetayKurDegeri(),
+
           ],
         ),
       ),
@@ -66,6 +67,7 @@ class Ulkedetay extends StatelessWidget {
     return Image.network(
       ulke.ulke_bayrak,
       width: MediaQuery.sizeOf(context).width / 2,
+      fit: BoxFit.fitWidth,
     );
   }
 
@@ -132,8 +134,7 @@ class Ulkedetay extends StatelessWidget {
                   Text(
                     ulke.ulke_para_birim,
                     style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                         color: Colors.white
                     ),
                   ),
