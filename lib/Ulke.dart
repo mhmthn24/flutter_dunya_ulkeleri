@@ -12,25 +12,24 @@ class Ulke{
   String ulke_para_birim;
 
   Ulke.fromMap(Map<String, dynamic> ulkeMap):
-    ulke_kod = ulkeMap["cca2"] ?? "",
-    ulke_ad = ulkeMap["name"]?["common"] ?? "",
+    ulke_kod = ulkeMap["cca2"] ?? "-",
+    ulke_ad = ulkeMap["name"]?["common"] ?? "-",
     ulke_yerel_ad = (ulkeMap["name"]["nativeName"] as Map<String, dynamic>?)
         ?.values
         .map((e) => e["common"])
-        .firstWhere((element) => element != null, orElse: () => "bulunamadı"),
-  ulke_dil = ((ulkeMap["languages"] ?? {}) as Map<String, dynamic>)
-        .entries
-        .toList().join("/").toString(),
-    ulke_bayrak = ulkeMap["flags"]?["png"] ?? "",
-    ulke_baskent = (ulkeMap["capital"] as List<dynamic>).isNotEmpty ? ulkeMap["capital"][0] : "",
+        .firstWhere((element) => element != null, orElse: () => "-"),
+    ulke_dil = ((ulkeMap["languages"] ?? {}) as Map<String, dynamic>)
+        .values.join(", ") ?? "-",
+    ulke_bayrak = ulkeMap["flags"]?["png"] ?? "-",
+    ulke_baskent = (ulkeMap["capital"] as List<dynamic>).isNotEmpty ? ulkeMap["capital"][0] : "-",
     ulke_nufus = ulkeMap["population"] ?? 0,
     ulke_bagimsizlik = ulkeMap["independent"].toString() ?? "-",
-    ulke_bolge = ulkeMap["region"] ?? "",
-    ulke_map = ulkeMap["maps"]?["openStreetMaps"] ?? "",
-    ulke_para_birim = (ulkeMap["currencies"] as Map<String, dynamic>)
-        .entries
-        .toList()
-        .join("-").toString();
+    ulke_bolge = ulkeMap["region"] ?? "-",
+    ulke_map = ulkeMap["maps"]?["googleMaps"] ?? "-",
+    ulke_para_birim = (ulkeMap["currencies"] is Map<String, dynamic> &&
+        (ulkeMap["currencies"] as Map<String, dynamic>).isNotEmpty)
+        ? (ulkeMap["currencies"] as Map<String, dynamic>).keys.first
+        : "-";
 }
 /*
 [

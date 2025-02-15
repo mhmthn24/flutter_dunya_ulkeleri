@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dunya_ulkeleri/Ulke.dart';
+import 'package:flutter_dunya_ulkeleri/UlkeDetay.dart';
 import 'package:http/http.dart';
 
 class Anasayfa extends StatefulWidget {
@@ -11,6 +12,13 @@ class Anasayfa extends StatefulWidget {
 }
 
 class _AnasayfaState extends State<Anasayfa> {
+  /*
+    Kullanılan JSON dokumani icin: https://restcountries.com
+
+    Dokuman sayfasinda da belirttigi gibi
+    https://restcountries.com/v3.1/all?fields= alanindan sonra dokumanda
+    bulunan name, flags, capital gibi istenilen ozelliklere bakabilirsiniz.
+   */
   final String _apiURL = "https://restcountries.com/v3.1/all?fields=name,flags,"
       "cca2,independent,currencies,capital,region,languages,area,"
       "maps,population,continents";
@@ -23,7 +31,6 @@ class _AnasayfaState extends State<Anasayfa> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_){
       _getUlkeler();
@@ -71,7 +78,7 @@ class _AnasayfaState extends State<Anasayfa> {
         mainAxisSize: MainAxisSize.max,
         children: [
           if(!aramaAktif)
-            Text("Ülkeler", style: TextStyle(color: Colors.white),)
+            Text("Countries", style: TextStyle(color: Colors.white),)
           else
             Expanded(
               child: TextField(
@@ -140,10 +147,15 @@ class _AnasayfaState extends State<Anasayfa> {
 
     return Card(
       child: ListTile(
-        title: Text(gosterilecekUlkeler[index].ulke_ad),
-        subtitle: Text("Başkent: ${gosterilecekUlkeler[index].ulke_baskent}"),
+        title: Text(utf8.decode(gosterilecekUlkeler[index].ulke_ad.runes.toList())),
+        subtitle: Text("Capital: ${utf8.decode(gosterilecekUlkeler[index].ulke_baskent.runes.toList())}"),
         leading: CircleAvatar(backgroundImage: NetworkImage(gosterilecekUlkeler[index].ulke_bayrak),),
         trailing: Icon(Icons.favorite_border, color: Colors.red,),
+        onTap: (){
+          setState(() {
+            _gitUlkeDetay(gosterilecekUlkeler[index]);
+          });
+        },
       ),
     );
   }
@@ -158,9 +170,12 @@ class _AnasayfaState extends State<Anasayfa> {
         arananUlkeler = _ulkeler
             .where((ulke) => ulke.ulke_ad.toLowerCase().contains(arananKelime))
             .toList();
+      }else{
+        arananUlkeler.clear();
       }
     });
   }
+
   void _getUlkeler() async {
     /*
       API kullanarak ulke bilgilerini alalim
@@ -180,6 +195,13 @@ class _AnasayfaState extends State<Anasayfa> {
     // Ulke adına göre sıralama yapalım
     _ulkeler.sort((a, b) => a.ulke_ad.compareTo(b.ulke_ad));
     setState(() {});
+  }
+
+  void _gitUlkeDetay(Ulke ulke){
+    MaterialPageRoute gidilecekSayfa = MaterialPageRoute(builder: (BuildContext context){
+      return Ulkedetay(ulke);
+    });
+    Navigator.push(context, gidilecekSayfa);
   }
 
 }
